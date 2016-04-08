@@ -52,6 +52,7 @@ Window window, root;
 #define MAXGOODWILL  (TIMEOUTPERATTEMPT*5)
 #define INITIALGOODWILL MAXGOODWILL
 #define GOODWILLPORTION 0.3
+#define CMDMAXLEN 64
 
 struct passwd *pw;
 int passwordok(const char *s) {
@@ -87,7 +88,10 @@ int main(int argc, char **argv){
 #endif
   struct timeval tv;
   int tvt, gs;
+  int opt, index, cmdlen = 0;
+  char cmdstr[CMDMAXLEN] = {0};
 
+#if 0
   if ((argc == 2) && (strcmp(argv[1], "-b") == 0)) {
     blank = 1;
   } else if (argc > 1) {
@@ -95,7 +99,53 @@ int main(int argc, char **argv){
             program_version);
     exit(1);
   }
-  
+#endif
+
+  while ((opt = getopt (argc, argv, "bc:")) != -1) {
+    switch (opt) {
+      case 'b':
+        blank = 1;
+        break;
+      case 'c':
+        strncpy(cmdstr, optarg, CMDMAXLEN - 1);
+	cmdlen = strlen(cmdstr);
+        break;
+      case '?':
+	if (optopt == 'c')
+	  fprintf (stderr, "Option -c requires an argument.\n");
+        else
+          fprintf (stderr, "Unknown option.\n");
+
+        exit(1);
+      default:
+        fprintf(stderr,"xtrlock (version %s); usage: xtrlock [-b]\n",
+                program_version);
+        exit(1);
+    }
+  }
+
+  if (cmdstr[0] == '-') {
+    fprintf (stderr, "Option -c requires an argument.\n");
+    exit(1);
+  }
+
+  if (cmdstr[0]) {
+    for (index = optind; index < argc; index++) {
+      cmdlen += strlen(argv[index]) + 1;
+      if (cmdlen < CMDMAXLEN) {
+        strcat(cmdstr, " ");
+        strcat(cmdstr, argv[index]);
+      } else {
+        fprintf (stderr, "Command too large. Ignoring.\n");
+        cmdlen = 0;
+        break;
+      }
+    }
+  }
+
+  if (cmdlen)
+    fprintf(stdout, "cmd: [%s]\n", cmdstr);
+
   errno=0;  pw= getpwuid(getuid());
   if (!pw) { perror("password entry for uid not found"); exit(1); }
 #ifdef SHADOW_PWD
@@ -251,5 +301,8 @@ int main(int argc, char **argv){
     }
   }
  loop_x:
+  if (cmdlen)
+    system(cmdstr);
+
   exit(0);
 }

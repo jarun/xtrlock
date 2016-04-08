@@ -17,4 +17,4 @@ Copy the `xtrlock` binary generated to any location in your `$PATH`.
 # Usage
 The new option added is `-c` (for *Command*). To start `xtrlock` in screen blanking mode and set monitor backlight level to 20 after unlocking the screen, run:
 
-    $ /bin/xtrlock -c "xbacklight -set 20" -b
+    $ xtrlock -c "xbacklight -set 20" -b

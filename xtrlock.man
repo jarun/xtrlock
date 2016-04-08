@@ -1,0 +1,55 @@
+.TH XTRLOCK 1
+.SH NAME
+xtrlock \- Lock X display until password supplied, leaving windows visible
+.SH SYNOPSIS
+.B xtrlock [-b]
+.SH DESCRIPTION
+.B xtrlock
+locks the X server till the user enters their password at the keyboard.
+
+While
+.B xtrlock
+is running, the mouse and keyboard are grabbed and the mouse cursor
+becomes a padlock.  Output displayed by X programs, and windows put up
+by new X clients, continue to be visible, and any new output is
+displayed normally.
+
+The mouse and keyboard are returned when the user types their
+password, followed by Enter or Newline.  If an incorrect password is
+entered the bell is sounded.  Pressing Backspace or Delete erases one
+character of a password partially typed; pressing Escape or Clear
+clears anything that has been entered.
+
+If too many attempts are made in too short a time further keystrokes
+generate bells and are otherwise ignored until a timeout has expired.
+
+The X server screen saver continues to operate normally; if it comes
+into operation the display may be restored by the usual means of
+touching a key (Shift, for example) or the mouse.
+.SH OPTIONS
+.TP
+\fB\-b\fR
+blank the screen as well as displaying the padlock
+.SH X RESOURCES, CONFIGURATION
+None.
+.SH BUGS
+Additional input devices other than the keyboard and mouse are not
+disabled.
+
+The timeouts, bitmaps and mouse cursor colour cannot be modifed.
+.SH SEE ALSO
+.BR X "(1), Xlib Documentation."
+.SH AUTHOR
+Ian Jackson <ian@chiark.greenend.org.uk>
+.SH COPYRIGHT
+Copyright (C) 1993, 1994 by Ian Jackson.
+
+Permission to use, copy, modify and distribute this software and its
+documentation is granted under the terms of the GNU General Public
+Licence, version 2 or later, as published by the Free Software
+Foundation.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.

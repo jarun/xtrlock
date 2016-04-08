@@ -1,0 +1,3 @@
+#Lintian overrides for xtrlock
+#xtrlock needs to be setgit shadow so it can read the shadow file
+xtrlock: setgid-binary usr/bin/xtrlock 2755 root/shadow 

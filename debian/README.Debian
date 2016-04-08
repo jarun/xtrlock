@@ -1,0 +1,57 @@
+This is X Transparent Lock.  Xtrlock is a very minimal X display lock
+program, which uses nothing except the Xlib library.  It doesn't
+obscure the screen, it is completely idle while the display is locked
+and you don't type at it, and it doesn't do funny things to the X
+access control lists.  On my system the binary is under 10K
+(Linux/i386, compiled with gcc -O2 -m486 -s).
+
+Note that xtrlock currently does not work with shadow passwords.  If
+someone sends me some portable patches for shadow password support
+I'll probably include them.
+
+[ Shadow passwords are now supported on Linux, and Solaris 2.x (not
+  tested).  To work with shadow passwords, this program should be
+  compiled with -DSHADOW_PWD and installed setuid root (it will drop
+  privileges as soon as possible).  The shadow-aware version will
+  still work fine if you don't have shadow passwords.
+
+  April 9, 1996
+  -- Marek Michalkiewicz <marekm@i17linuxb.ists.pwr.wroc.pl> ]
+
+You need an ANSI C compiler, such as GCC.  Do not attempt to compile
+xtrlock with an old C compiler such as most systems' `cc'.
+
+There is no support for X resources or command-line arguments - the
+timeouts and cursor bitmaps and colours cannot be modified.  If
+someone sends me some Xlib-only X resource support I may include it.
+
+To install xtrlock:
+
+Build the program:
+	xmkmf
+	make
+
+Test it:
+	./xtrlock
+
+Install it and the manpage:
+	really make install install.man
+
+
+xtrlock is Copyright 1993, 1994 Ian Jackson.  It is free software; you
+can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation;
+either version 2, or (at your option) any later version.
+
+It is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+In order to save space I have not included a copy of version 2 of the
+GNU General Public Licence here.  If you do not have one, send me
+email at <ijackson@nyx.cs.du.edu>, or write to me at Churchill
+College, Cambridge, CB3 0DS, United Kingdom, or to the Free Software
+Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
+
+It is also available by anonymous FTP from prep.ai.mit.edu.

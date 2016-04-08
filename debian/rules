@@ -1,0 +1,75 @@
+#!/usr/bin/make -f
+# debian/rules file for xtrlock-2.0
+# Based upon the sample debian.rules file by Ian Jackson.
+
+package=xtrlock
+
+arch=$(shell dpkg --print-architecture)
+STRIP=strip
+
+DPKG_EXPORT_BUILDFLAGS = 1
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+include /usr/share/dpkg/buildflags.mk
+
+CFLAGS+=-DSHADOW_PWD
+
+build:
+	$(checkdir)
+	xmkmf
+	$(MAKE) CFLAGS="$(CFLAGS)" CDEBUGFLAGS="" LOCAL_LDFLAGS="$(LDFLAGS)" xtrlock
+	touch build
+
+clean:
+	$(checkdir)
+	-rm -f build
+	-rm -f xtrlock *.o *.bak Makefile
+	-rm -rf debian/tmp *~ debian/files debian/substvars debian/*~
+
+binary-indep:	checkroot
+#No binary independent files in this package
+
+binary-arch:	checkroot build
+	-rm -rf debian/tmp
+	install -m 755 -d debian/tmp/usr/bin debian/tmp/usr/share/man/man1
+	install -m 755 -d debian/tmp/usr/share/doc/xtrlock debian/tmp/DEBIAN
+	install -m 755 -d debian/tmp/usr/share/menu
+	install -m 755 -d debian/tmp/usr/share/lintian/overrides
+	# has to be setgid shadow to support shadow passwords.  --marekm
+	install -m 755 xtrlock debian/tmp/usr/bin/xtrlock
+	# Is nostrip set in DEB_BUILD_OPTIONS?
+	case "$$DEB_BUILD_OPTIONS" in \
+	*nostrip*)\
+	;; \
+	*) \
+	$(STRIP) debian/tmp/usr/bin/xtrlock \
+	;; \
+	esac
+	install -m 644 xtrlock.man debian/tmp/usr/share/man/man1/xtrlock.1x
+	gzip -9nv debian/tmp/usr/share/man/man1/xtrlock.1x
+	install -m 644 debian/changelog debian/tmp/usr/share/doc/xtrlock
+	gzip -9nv debian/tmp/usr/share/doc/xtrlock/*
+	install -m 644 debian/copyright debian/tmp/usr/share/doc/xtrlock
+	install -m 644 debian/menu debian/tmp/usr/share/menu/xtrlock
+	install -m 644 debian/xtrlock.lintian-overrides \
+	debian/tmp/usr/share/lintian/overrides/xtrlock
+	install -m 755 debian/postinst debian/postrm debian/tmp/DEBIAN
+	cp debian/control debian/tmp/DEBIAN/control
+	dpkg-shlibdeps debian/tmp/usr/bin/xtrlock
+	dpkg-gencontrol -isp
+	chown -R root.root debian/tmp
+	chown root.shadow debian/tmp/usr/bin/xtrlock
+	chmod -R g-w debian/tmp
+	chmod 2755 debian/tmp/usr/bin/xtrlock
+	dpkg --build debian/tmp ..
+
+binary:	binary-indep binary-arch
+
+define checkdir
+	test -f debian/rules
+endef
+
+checkroot:
+	$(checkdir)
+	test root = "`whoami`"
+
+.PHONY: binary clean checkroot

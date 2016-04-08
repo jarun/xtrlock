@@ -12,6 +12,8 @@ To compile, run:
 
     $ make -f Makefile.noimake CFLAGS="${CFLAGS} -DSHADOW_PWD" LDLIBS="-lX11 -lcrypt" xtrlock
 
+Copy the `xtrlock` binary generated to any location in your `$PATH`.
+
 # Usage
 The new option added is `-c` (for *Command*). To start `xtrlock` in screen blanking mode and set monitor backlight level to 20 after unlocking the screen, run:
 

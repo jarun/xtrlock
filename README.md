@@ -10,7 +10,7 @@ This is a fork of Ian Jackson's screen-locking utility. The [source](http://ftp.
 ## Install
 To compile, run:
 
-    $ make CFLAGS="${CFLAGS} -DSHADOW_PWD" LDLIBS="-lX11 -lcrypt" xtrlock
+    $ make
 
 To install, run:
 

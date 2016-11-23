@@ -1,3 +1,10 @@
+xtrlock (2.8) unstable; urgency=low
+
+  * patch from Simon Tatham to add a -f option [fork, and return success
+    from parent once lock acquired] (Closes: #823685)
+
+ -- Matthew Vernon <matthew@debian.org>  Sat, 21 May 2016 19:08:12 +0100
+
 xtrlock (2.7) unstable; urgency=low
 
   * patch from Chris Lamb to make builds reproducible by adding -n to gzip

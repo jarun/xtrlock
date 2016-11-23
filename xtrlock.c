@@ -59,7 +59,7 @@ int passwordok(const char *s) {
 #if 0
   char key[3];
   char *encr;
-  
+
   key[0] = *(pw->pw_passwd);
   key[1] =  (pw->pw_passwd)[1];
   key[2] =  0;
@@ -82,7 +82,7 @@ int main(int argc, char **argv){
   Cursor cursor;
   Pixmap csr_source,csr_mask;
   XColor csr_fg, csr_bg, dummy, black;
-  int ret, screen, blank = 0;
+  int ret, screen, blank = 0, fork_after = 0;
 #ifdef SHADOW_PWD
   struct spwd *sp;
 #endif
@@ -92,12 +92,20 @@ int main(int argc, char **argv){
   char cmdstr[CMDMAXLEN] = {0};
 
 #if 0
-  if ((argc == 2) && (strcmp(argv[1], "-b") == 0)) {
-    blank = 1;
-  } else if (argc > 1) {
-    fprintf(stderr,"xtrlock (version %s); usage: xtrlock [-b]\n",
-            program_version);
-    exit(1);
+  while (argc > 1) {
+    if ((strcmp(argv[1], "-b") == 0)) {
+      blank = 1;
+      argc--;
+      argv++;
+    } else if ((strcmp(argv[1], "-f") == 0)) {
+      fork_after = 1;
+      argc--;
+      argv++;
+    } else {
+      fprintf(stderr,"xtrlock (version %s); usage: xtrlock [-b] [-f]\n",
+              program_version);
+      exit(1);
+    }
   }
 #endif
 
@@ -108,22 +116,19 @@ int main(int argc, char **argv){
         break;
       case 'c':
         strncpy(cmdstr, optarg, CMDMAXLEN - 1);
-	cmdlen = strlen(cmdstr);
+        cmdlen = strlen(cmdstr);
         break;
-      case '?':
-	if (optopt == 'c')
-	  fprintf (stderr, "Option -c requires an argument.\n");
-        else
-          fprintf (stderr, "Unknown option.\n");
-
-        exit(1);
+      case 'f':
+        fork_after = 1;
+        break;
       default:
-        fprintf(stderr,"xtrlock (version %s); usage: xtrlock [-b]\n",
+        fprintf(stderr,"xtrlock (version %s mod); usage: xtrlock [-b] [-f] [-c] [...]\n",
                 program_version);
         exit(1);
     }
   }
 
+  /* Make sure not to consume the next input option */
   if (cmdstr[0] == '-') {
     fprintf (stderr, "Option -c requires an argument.\n");
     exit(1);
@@ -155,9 +160,9 @@ int main(int argc, char **argv){
   endspent();
 #endif
 
-  /* logically, if we need to do the following then the same 
-     applies to being installed setgid shadow.  
-     we do this first, because of a bug in linux. --jdamery */ 
+  /* logically, if we need to do the following then the same
+     applies to being installed setgid shadow.
+     we do this first, because of a bug in linux. --jdamery */
   if (setgid(getgid())) { perror("setgid"); exit(1); }
   /* we can be installed setuid root to support shadow passwords,
      and we don't need root privileges any longer.  --marekm */
@@ -166,7 +171,7 @@ int main(int argc, char **argv){
   if (strlen(pw->pw_passwd) < 13) {
     fputs("password entry has no pwd\n",stderr); exit(1);
   }
-  
+
   display= XOpenDisplay(0);
 
   if (display==NULL) {
@@ -174,7 +179,7 @@ int main(int argc, char **argv){
 	    program_version);
     exit(1);
   }
-  
+
   attrib.override_redirect= True;
 
   if (blank) {
@@ -183,14 +188,14 @@ int main(int argc, char **argv){
     window= XCreateWindow(display,DefaultRootWindow(display),
                           0,0,DisplayWidth(display, screen),DisplayHeight(display, screen),
                           0,DefaultDepth(display, screen), CopyFromParent, DefaultVisual(display, screen),
-                          CWOverrideRedirect|CWBackPixel,&attrib); 
+                          CWOverrideRedirect|CWBackPixel,&attrib);
     XAllocNamedColor(display, DefaultColormap(display, screen), "black", &black, &dummy);
   } else {
     window= XCreateWindow(display,DefaultRootWindow(display),
                           0,0,1,1,0,CopyFromParent,InputOnly,CopyFromParent,
                           CWOverrideRedirect,&attrib);
   }
-                        
+
   XSelectInput(display,window,KeyPressMask|KeyReleaseMask);
 
   csr_source= XCreateBitmapFromData(display,window,lock_bits,lock_width,lock_height);
@@ -229,7 +234,7 @@ int main(int argc, char **argv){
    *microsecs and trying to grab each time. If we still fail
    *(i.e. after 1s in total), then give up, and emit an error
    */
-  
+
   gs=0; /*gs==grab successful*/
   for (tvt=0 ; tvt<100; tvt++) {
     ret = XGrabKeyboard(display,window,False,GrabModeAsync,GrabModeAsync,
@@ -256,6 +261,17 @@ int main(int argc, char **argv){
     fprintf(stderr,"xtrlock (version %s): cannot grab pointer\n",
 	    program_version);
     exit(1);
+  }
+
+  if (fork_after) {
+    pid_t pid = fork();
+    if (pid < 0) {
+      fprintf(stderr,"xtrlock (version %s): cannot fork: %s\n",
+              program_version, strerror(errno));
+      exit(1);
+    } else if (pid > 0) {
+      exit(0);
+    }
   }
 
   for (;;) {

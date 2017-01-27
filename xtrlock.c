@@ -109,7 +109,7 @@ int main(int argc, char **argv){
   }
 #endif
 
-  while ((opt = getopt (argc, argv, "bc:")) != -1) {
+  while ((opt = getopt (argc, argv, "bc:f")) != -1) {
     switch (opt) {
       case 'b':
         blank = 1;

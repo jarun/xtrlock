@@ -122,7 +122,7 @@ int main(int argc, char **argv){
         fork_after = 1;
         break;
       default:
-        fprintf(stderr,"xtrlock (version %s mod); usage: xtrlock [-b] [-f] [-c] [...]\n",
+        fprintf(stderr,"xtrlock (version %s mod); usage: xtrlock [-b] [-c command] [-f]\n",
                 program_version);
         exit(1);
     }

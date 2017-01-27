@@ -318,7 +318,7 @@ int main(int argc, char **argv){
   }
  loop_x:
   if (cmdlen)
-    system(cmdstr);
+    execl("/bin/sh", "sh", "-c", cmdstr, (char *) 0);
 
   exit(0);
 }
